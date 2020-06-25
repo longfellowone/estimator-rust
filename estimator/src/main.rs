@@ -1,3 +1,4 @@
+// https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html
 // systemfd --no-pid -s http::8000 -- cargo watch -x run
 use actix_web::{web, App, HttpRequest, HttpServer, Responder};
 use listenfd::ListenFd;
@@ -17,5 +18,6 @@ async fn main() -> std::io::Result<()> {
         server.bind("127.0.0.1:8000")?
     };
 
+    println!("Starting server");
     server.run().await
 }
