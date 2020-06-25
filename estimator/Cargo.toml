@@ -1,0 +1,10 @@
+[package]
+name = "estimator"
+version = "0.1.0"
+authors = ["Matt Wright <mattwright3195@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+listenfd = "0.3"
+actix-web = "2.0"
+actix-rt = "1.0"
