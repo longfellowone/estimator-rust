@@ -1,23 +1,34 @@
 // https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html
 // systemfd --no-pid -s http::8000 -- cargo watch -x run
-use actix_web::{web, App, HttpRequest, HttpServer, Responder};
+use actix_web::{web, App, HttpServer, Responder};
+use anyhow::Result;
 use listenfd::ListenFd;
+use sqlx::PgPool;
 
-async fn index(_req: HttpRequest) -> impl Responder {
+async fn index(db_pool: web::Data<PgPool>) -> impl Responder {
+    println!("{:#?}", db_pool.get_ref());
     "Hello World!"
 }
 
 #[actix_rt::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> Result<()> {
     let mut listenfd = ListenFd::from_env();
-    let mut server = HttpServer::new(|| App::new().route("/", web::get().to(index)));
 
-    server = if let Some(l) = listenfd.take_tcp_listener(0).unwrap() {
-        server.listen(l)?
-    } else {
-        server.bind("127.0.0.1:8000")?
+    let db_pool = PgPool::new("postgres://postgres:postgres@localhost/rust").await?;
+
+    let mut server = HttpServer::new(move || {
+        App::new()
+            .data(db_pool.clone())
+            .route("/", web::get().to(index))
+    });
+
+    server = match listenfd.take_tcp_listener(0).unwrap() {
+        Some(listener) => server.listen(listener)?,
+        None => server.bind("127.0.0.1:8000")?,
     };
 
     println!("Starting server");
-    server.run().await
+    server.run().await?;
+
+    Ok(())
 }

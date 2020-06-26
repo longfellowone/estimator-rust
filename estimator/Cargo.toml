@@ -10,3 +10,5 @@ actix-web = "2"
 actix-rt = "1"
 async-graphql = "1.16"
 async-graphql-actix-web = "1.14"
+sqlx = { version = "0.3", features = [ "postgres" ] }
+anyhow = "1"
