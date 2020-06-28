@@ -6,8 +6,59 @@ use listenfd::ListenFd;
 use sqlx::PgPool;
 
 async fn index(db_pool: web::Data<PgPool>) -> impl Responder {
-    println!("{:#?}", db_pool.get_ref());
-    "Hello World!"
+    // let result = sqlx::query!(
+    //     r#"
+    //         SELECT *
+    //         FROM assemblies
+    //         WHERE id = $1
+    //     "#,
+    //     2
+    // )
+    // .fetch_one(db_pool.get_ref())
+    // .await;
+    //
+    // match result {
+    //     Ok(r) => println!("{}", r.name),
+    //     _ => println!("Nothing found"),
+    // }
+
+    // let mut assemblies = vec![];
+    // let res = sqlx::query!(
+    //     r#"
+    //         SELECT *
+    //         FROM assemblies
+    //     "#,
+    // )
+    // .fetch_all(db_pool.get_ref())
+    // .await;
+    // // .unwrap()
+    //
+    // match res {
+    //     Ok(r) => r.into_iter().for_each(|a| assemblies.push(a.name)),
+    //     _ => println!("Nothing found"),
+    // }
+    //
+    // assemblies.iter().for_each(|name| println!("{}", name));
+
+    #[derive(Debug)]
+    struct Assembly {
+        name: String,
+    }
+
+    let res = sqlx::query_as!(
+        Assembly,
+        r#"
+            SELECT name
+            FROM assemblies
+        "#,
+    )
+    .fetch_all(db_pool.get_ref())
+    .await
+    .unwrap();
+
+    println!("{:?}", res);
+
+    "Hello world!"
 }
 
 #[actix_rt::main]
